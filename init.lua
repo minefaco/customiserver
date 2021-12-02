@@ -16,9 +16,9 @@ end
 --Cambiar colores en el chat
 minetest.register_on_chat_message(function(name, message)
     local pmeta = minetest.get_player_by_name(name):get_meta()
-    local text = minetest.colorize(minetest.deserialize(pmeta:get_string("customiserver_data")).colour,message)
     local nick = minetest.deserialize(pmeta:get_string("customiserver_data")).nick
-    minetest.chat_send_all("["..nick.."] > "..text)
+    local text = minetest.colorize(minetest.deserialize(pmeta:get_string("customiserver_data")).colour,"["..nick.."] > "..message)
+    minetest.chat_send_all(text)
     return true
 end)
 
@@ -65,21 +65,29 @@ minetest.register_chatcommand("nickname", {
         interact = true,
     },
     func = function(name, param)
-        if string.len(param)>8 then
-            minetest.chat_send_player(name, "El nombre no debe exceder los 8 carácteres")
-        else
-            local player = minetest.get_player_by_name(name)
-            local pmeta = minetest.get_player_by_name(name):get_meta()
-            local detail = minetest.deserialize(pmeta:get_string("customiserver_data"))
-            local data = { nick = param, colour = detail.colour }
+        local player = minetest.get_player_by_name(name)
+        local pmeta = minetest.get_player_by_name(name):get_meta()
+        local detail = minetest.deserialize(pmeta:get_string("customiserver_data"))
+        if param == "del" then
+            local data = { nick = name, colour = detail.colour }
             pmeta:set_string("customiserver_data", minetest.serialize(data))
             customiserver.update_nametag(player)
-            return true, minetest.colorize(minetest.deserialize(pmeta:get_string("customiserver_data")).colour,"Has cambiado tu nickname!")
+            minetest.chat_send_player(name, "Nickname Borrado")
+        else
+            if string.len(param)>10 then
+                minetest.chat_send_player(name, "El nombre no debe exceder los 10 carácteres")
+            else
+                if minetest.player_exists(param) then
+                    minetest.chat_send_player(name, "No puedes usar el nombre de un jugador como nickname")
+                else
+                    local data = { nick = param, colour = detail.colour }
+                    pmeta:set_string("customiserver_data", minetest.serialize(data))
+                    customiserver.update_nametag(player)
+                    return true, minetest.colorize(minetest.deserialize(pmeta:get_string("customiserver_data")).colour,"Has cambiado tu nickname!")
+                end
+            end
         end
 
     end,
 })
-
-
-
 
