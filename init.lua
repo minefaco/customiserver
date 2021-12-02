@@ -91,3 +91,14 @@ minetest.register_chatcommand("nickname", {
     end,
 })
 
+minetest.register_craftitem("customiserver:lupa", {
+description = "Te dice el nombre de un jugador",
+inventory_image = "lupa.png",
+wield_image = "lupa.png",
+stack_max = 1,
+on_use = function(itemstack, user, pointed_thing)
+    if pointed_thing.type == "object" and minetest.is_player(pointed_thing.ref) then
+        minetest.chat_send_player(user:get_player_name(),"this player is: "..pointed_thing.ref:get_player_name())
+    end
+end
+})
